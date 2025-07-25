@@ -19,14 +19,23 @@ export default function Login() {
     try {
       const res = await api.post("/auth/login", { identifier, password });
 
-      const token = res.data.data.token;
-      localStorage.setItem("token", token);
+      const { token, username, name, email, bio, avatar, user_id } =
+        res.data.data;
 
-      login(true);
+      login({
+        id: user_id,
+        username,
+        name,
+        email,
+        avatar,
+        bio,
+        token,
+      });
+
       navigate("/");
     } catch (err: any) {
       console.error("Login error", err);
-      setErrorMsg(err.response?.data?.message || "user atau password salah");
+      setErrorMsg(err.response?.data?.message || "User atau password salah");
     }
   };
 

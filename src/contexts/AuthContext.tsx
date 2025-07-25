@@ -1,33 +1,38 @@
-import type { AuthContextType } from "@/types/auth-type";
-import { createContext, useEffect, useState } from "react";
+import { clearUser, setUser } from "@/store/userSlice";
+import type { AuthContextType } from "@/types/auth";
+import type { UserState } from "@/types/user";
+import { createContext, useEffect } from "react";
+import { useDispatch } from "react-redux";
 
 export const AuthContext = createContext<AuthContextType>({
-  isAuthenticated: false,
   login: () => {},
   logout: () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      setIsAuthenticated(true);
+    const userData = localStorage.getItem("user");
+    if (token && userData) {
+      dispatch(setUser(JSON.parse(userData)));
     }
   }, []);
 
-  const login = (isAuthenticated: boolean) => {
-    setIsAuthenticated(isAuthenticated);
+  const login = (user: UserState) => {
+    dispatch(setUser(user));
+    localStorage.setItem("token", user!.token);
+    localStorage.setItem("user", JSON.stringify(user));
   };
 
   const logout = () => {
     localStorage.removeItem("token");
-    setIsAuthenticated(false);
+    localStorage.removeItem("user");
+    dispatch(clearUser());
   };
 
   const contextValue: AuthContextType = {
-    isAuthenticated,
     login,
     logout,
   };

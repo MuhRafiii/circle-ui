@@ -1,5 +1,7 @@
 import { ProfileCard } from "@/components/ProfileCard";
+import { ReplyCard } from "@/components/Reply";
 import { Sidebar } from "@/components/Sidebar";
+import { ThreadDetailCard } from "@/components/ThreadDetail";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,101 +17,84 @@ import { Input } from "@/components/ui/input";
 import { useSocket } from "@/hooks/useSocket";
 import { api } from "@/services/api";
 import type { RootState } from "@/store";
-import { setLike, toggleLike } from "@/store/likeSlice";
+import type { Reply } from "@/types/reply";
 import type { Thread } from "@/types/thread";
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import { ThreadCard } from "../components/Thread";
+import { useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 
-export function Home() {
+export function ThreadDetail() {
+  const { thread_id } = useParams();
   const user = useSelector((state: RootState) => state.user);
-  // const likesRedux = useSelector((state: RootState) => state.likes);
-  const [threads, setThreads] = useState<Thread[]>([]);
+  const [thread, setThread] = useState<Thread | null>(null);
+  const [replies, setReplies] = useState<Reply[]>([]);
   const [loading, setLoading] = useState(false);
-  const [content, setContent] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [content, setContent] = useState("");
   const socket = useSocket();
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchThreads = async () => {
+    if (!thread_id) return;
+
+    const fetchThreadAndReplies = async () => {
       try {
         setLoading(true);
-        const res = await api.get("/thread");
-        setThreads(res.data.data.threads);
-        navigate("/");
+
+        const [threadRes, replyRes] = await Promise.all([
+          api.get(`/thread/${thread_id}`),
+          api.get(`/reply?thread_id=${thread_id}`),
+        ]);
+
+        setThread(threadRes.data.data);
+        setReplies(replyRes.data.data.replies);
+        console.log(threadRes.data.data, replyRes.data.data.replies);
       } catch (err) {
-        console.error("Gagal fetch data", err);
+        console.error("Gagal fetch thread / replies", err);
       } finally {
-        setTimeout(() => {
-          setLoading(false);
-        }, 200);
+        setTimeout(() => setLoading(false), 300);
       }
     };
 
-    fetchThreads();
-  }, []);
+    fetchThreadAndReplies();
+  }, [thread_id]);
 
   useEffect(() => {
     if (!socket) return;
 
-    const handleNewThread = ({
-      tweet: newThread,
-      userId,
-    }: {
-      tweet: Thread;
-      userId: number;
-    }) => {
-      setThreads((prev) => [newThread, ...prev]);
-
-      if (userId !== user?.id) {
-        toast.info(`🆕 ${newThread.user.name} just posted a new thread!`);
-      } else {
-        toast.success("🎉 Thread berhasil diposting!");
-      }
+    const handleNewThread = (newReply: Reply) => {
+      const replyWithImage = {
+        ...newReply,
+        image: newReply.image
+          ? `http://localhost:3000/uploads/${newReply.image}?t=${Date.now()}`
+          : undefined,
+      };
+      setReplies((prev) => [replyWithImage, ...prev]);
+      console.log(newReply);
     };
 
-    socket.on("new-thread", handleNewThread);
+    socket.on("new-reply", handleNewThread);
 
     return () => {
-      socket.off("new-thread", handleNewThread);
+      socket.off("new-reply", handleNewThread);
     };
-  }, [socket, user]);
+  }, [socket]);
 
-  const handleLike = async (threadId: number, isLiked: boolean) => {
-    const prevThreads = [...threads];
+  const handleLike = async (id: number) => {
+    if (!thread) return;
 
-    // Optimistic update (ubah Redux duluan)
-    dispatch(setLike({ thread_id: threadId, liked: !isLiked }));
-
-    setThreads((prev) =>
-      prev.map((thread) => {
-        if (thread.id === threadId) {
-          const isLiked = !thread.isLiked;
-          const likes = thread.likes + (isLiked ? 1 : -1);
-          return { ...thread, isLiked, likes };
-        }
-        return thread;
-      })
-    );
+    const updated = {
+      ...thread,
+      isLiked: !thread.isLiked,
+      likes: thread.likes + (thread.isLiked ? -1 : 1),
+    };
+    setThread(updated);
 
     try {
-      const res = await api.post(`/thread/${threadId}/like`);
-      const liked = res.data.data.isLiked;
-      dispatch(setLike({ thread_id: threadId, liked }));
-      if (liked !== !isLiked) {
-        dispatch(setLike({ thread_id: threadId, liked }));
-      }
+      await api.post(`/thread/${id}/like`);
     } catch (err) {
-      console.error("Gagal like thread", err);
-      // Rollback Redux
-      dispatch(toggleLike(threadId));
-      // Rollback UI
-      setThreads(prevThreads);
+      console.error("Failed to like", err);
+      setThread(thread); // rollback
     }
   };
 
@@ -122,14 +107,19 @@ export function Home() {
         formData.append("image", image);
       }
 
-      const res = await api.post("/thread/upload", formData);
+      const res = await api.post(
+        `/reply/upload?thread_id=${thread_id}`,
+        formData
+      );
       setContent("");
       setPreview(null);
       console.log(res.data);
     } catch (err) {
-      console.error("Gagal mengupload thread", err);
+      console.error("Gagal mengupload reply", err);
     }
   };
+
+  if (loading || !thread) return <div>Loading...</div>;
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -137,7 +127,8 @@ export function Home() {
         <Sidebar />
       </div>
       <div className="w-full overflow-y-auto">
-        <h1 className="text-2xl text-start font-bold p-4 pt-6">Home</h1>
+        <ThreadDetailCard key={thread.id} thread={thread} onLike={handleLike} />
+
         <div className="flex items-center gap-4 p-4">
           <Avatar>
             <AvatarImage src={user?.avatar} />
@@ -148,7 +139,7 @@ export function Home() {
           >
             <input
               type="textarea"
-              placeholder="What is happening?!"
+              placeholder="Type your reply!"
               className="w-full border-none bg-none p-2 focus:ring rounded-md text-sm"
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -164,7 +155,7 @@ export function Home() {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle className="hidden">
-                    Create a new thread
+                    Create a new reply
                   </DialogTitle>
                 </DialogHeader>
                 <div className="p-2 pt-6">
@@ -174,7 +165,7 @@ export function Home() {
                     </Avatar>
                     <textarea
                       id="content"
-                      placeholder="What is happening?!"
+                      placeholder="Type your reply!"
                       className="w-full outline-none text-sm focus:ring rounded-md p-2"
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
@@ -231,21 +222,14 @@ export function Home() {
               size="sm"
               type="submit"
             >
-              {loading ? "Loading..." : "Post"}
+              {loading ? "Loading..." : "Reply"}
             </Button>
           </form>
         </div>
-        {loading && <div>Loading...</div>}
-        {threads.map((thread) => {
-          return (
-            <ThreadCard
-              key={thread.id}
-              thread={thread}
-              onLike={handleLike}
-              onClick={() => navigate(`/thread/${thread.id}`)}
-            />
-          );
-        })}
+
+        {replies.map((reply) => (
+          <ReplyCard key={reply.id} reply={reply} />
+        ))}
       </div>
       <div className="w-3/4">
         <ProfileCard />
