@@ -6,9 +6,26 @@ const userSlice = createSlice({
   initialState: null as UserState | null,
   reducers: {
     setUser: (_, action: PayloadAction<UserState>) => action.payload,
+    updateUser: (
+      state,
+      action: PayloadAction<{
+        username: string;
+        name: string;
+        bio: string;
+        avatar: string;
+      }>
+    ) => {
+      if (state) {
+        state.username = action.payload.username;
+        state.name = action.payload.name;
+        state.bio = action.payload.bio;
+        state.avatar = action.payload.avatar;
+        localStorage.setItem("user", JSON.stringify(state));
+      }
+    },
     clearUser: () => null,
   },
 });
 
-export const { setUser, clearUser } = userSlice.actions;
+export const { setUser, updateUser, clearUser } = userSlice.actions;
 export default userSlice.reducer;

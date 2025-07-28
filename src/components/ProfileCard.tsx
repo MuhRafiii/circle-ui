@@ -1,3 +1,4 @@
+import { EditProfile } from "@/pages/EditProfile";
 import type { RootState } from "@/store";
 import { useSelector } from "react-redux";
 import { Card, CardContent } from "./ui/card";
@@ -19,11 +20,9 @@ export function ProfileCard() {
               <img
                 src={user?.avatar}
                 alt={user?.name}
-                className="w-15 rounded-full border-2 border-white dark:border-zinc-900 ml-5"
+                className="w-15 h-15 rounded-full border-2 border-white dark:border-zinc-900 ml-5"
               />
-              <button className="text-xs font-semibold border border-zinc-900 dark:border-white hover:text-blue-400 hover:border-blue-400 dark:hover:border-blue-400 cursor-pointer rounded-full px-2.5 py-0.5">
-                Edit Profile
-              </button>
+              <EditProfile />
             </div>
             <div>
               <div className="text-xl font-semibold">{user?.name}</div>

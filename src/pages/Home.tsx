@@ -17,31 +17,59 @@ import { api } from "@/services/api";
 import type { RootState } from "@/store";
 import { setLike, toggleLike } from "@/store/likeSlice";
 import type { Thread } from "@/types/thread";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ThreadCard } from "../components/Thread";
+import "../index.css";
 
 export function Home() {
   const user = useSelector((state: RootState) => state.user);
-  // const likesRedux = useSelector((state: RootState) => state.likes);
   const [threads, setThreads] = useState<Thread[]>([]);
   const [loading, setLoading] = useState(false);
   const [content, setContent] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const socket = useSocket();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const observer = useRef<IntersectionObserver | null>(null);
+  const loadingPages = useRef<Set<number>>(new Set());
+  const lastThreadRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (loading) return;
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage((prev) => prev + 1);
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [loading, hasMore]
+  );
 
   useEffect(() => {
     const fetchThreads = async () => {
+      if (loadingPages.current.has(page)) return; // ✅ mencegah duplikasi fetch
+      loadingPages.current.add(page);
+
       try {
         setLoading(true);
-        const res = await api.get("/thread");
-        setThreads(res.data.data.threads);
-        navigate("/");
+
+        await new Promise((res) => setTimeout(res, 1000));
+
+        const res = await api.get(`/thread?page=${page}&limit=10`);
+        const newThreads: Thread[] = res.data.data.threads;
+        setThreads((prev) => [...prev, ...newThreads]);
+
+        if (newThreads.length < 10) {
+          setHasMore(false);
+        }
       } catch (err) {
         console.error("Gagal fetch data", err);
       } finally {
@@ -51,8 +79,10 @@ export function Home() {
       }
     };
 
-    fetchThreads();
-  }, []);
+    if (hasMore) {
+      fetchThreads();
+    }
+  }, [page]);
 
   useEffect(() => {
     if (!socket) return;
@@ -133,10 +163,10 @@ export function Home() {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <div className="w-1/2">
+      <div className="w-2/9">
         <Sidebar />
       </div>
-      <div className="w-full overflow-y-auto">
+      <div className="w-5/12 overflow-y-auto hide-scrollbar">
         <h1 className="text-2xl text-start font-bold p-4 pt-6">Home</h1>
         <div className="flex items-center gap-4 p-4">
           <Avatar>
@@ -235,19 +265,25 @@ export function Home() {
             </Button>
           </form>
         </div>
-        {loading && <div>Loading...</div>}
-        {threads.map((thread) => {
+        {threads.map((thread, i) => {
+          const isLast = threads.length === i + 1;
           return (
-            <ThreadCard
-              key={thread.id}
-              thread={thread}
-              onLike={handleLike}
-              onClick={() => navigate(`/thread/${thread.id}`)}
-            />
+            <div key={thread.id} ref={isLast ? lastThreadRef : null}>
+              <ThreadCard
+                thread={thread}
+                onLike={handleLike}
+                onClick={() => navigate(`/thread/${thread.id}`)}
+              />
+            </div>
           );
         })}
+        {loading && (
+          <div className="text-center py-4 text-sm text-gray-500">
+            Loading more...
+          </div>
+        )}
       </div>
-      <div className="w-3/4">
+      <div className="w-1/3">
         <ProfileCard />
       </div>
     </div>

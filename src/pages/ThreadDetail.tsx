@@ -19,9 +19,10 @@ import { api } from "@/services/api";
 import type { RootState } from "@/store";
 import type { Reply } from "@/types/reply";
 import type { Thread } from "@/types/thread";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
+import "../index.css";
 
 export function ThreadDetail() {
   const { thread_id } = useParams();
@@ -32,22 +33,49 @@ export function ThreadDetail() {
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [content, setContent] = useState("");
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const socket = useSocket();
+  const observer = useRef<IntersectionObserver | null>(null);
+  const loadingPages = useRef<Set<number>>(new Set());
+  const lastReplyRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (loading) return;
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage((prev) => prev + 1);
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [loading, hasMore]
+  );
 
   useEffect(() => {
     if (!thread_id) return;
 
     const fetchThreadAndReplies = async () => {
+      if (loadingPages.current.has(page)) return; // ✅ mencegah duplikasi fetch
+      loadingPages.current.add(page);
       try {
         setLoading(true);
 
+        await new Promise((res) => setTimeout(res, 1000));
+
         const [threadRes, replyRes] = await Promise.all([
           api.get(`/thread/${thread_id}`),
-          api.get(`/reply?thread_id=${thread_id}`),
+          api.get(`/reply?thread_id=${thread_id}&page=${page}&limit=10`),
         ]);
 
+        const newReplies: Reply[] = replyRes.data.data.replies;
         setThread(threadRes.data.data);
-        setReplies(replyRes.data.data.replies);
+        setReplies((prev) => [...prev, ...newReplies]);
+
+        if (newReplies.length < 10) {
+          setHasMore(false);
+        }
         console.log(threadRes.data.data, replyRes.data.data.replies);
       } catch (err) {
         console.error("Gagal fetch thread / replies", err);
@@ -56,27 +84,23 @@ export function ThreadDetail() {
       }
     };
 
-    fetchThreadAndReplies();
-  }, [thread_id]);
+    if (hasMore) {
+      fetchThreadAndReplies();
+    }
+  }, [thread_id, page]);
 
   useEffect(() => {
     if (!socket) return;
 
-    const handleNewThread = (newReply: Reply) => {
-      const replyWithImage = {
-        ...newReply,
-        image: newReply.image
-          ? `http://localhost:3000/uploads/${newReply.image}?t=${Date.now()}`
-          : undefined,
-      };
-      setReplies((prev) => [replyWithImage, ...prev]);
+    const handleNewReply = (newReply: Reply) => {
+      setReplies((prev) => [newReply, ...prev]);
       console.log(newReply);
     };
 
-    socket.on("new-reply", handleNewThread);
+    socket.on("new-reply", handleNewReply);
 
     return () => {
-      socket.off("new-reply", handleNewThread);
+      socket.off("new-reply", handleNewReply);
     };
   }, [socket]);
 
@@ -119,14 +143,14 @@ export function ThreadDetail() {
     }
   };
 
-  if (loading || !thread) return <div>Loading...</div>;
+  if (!thread) return <div>Loading...</div>;
 
   return (
     <div className="flex h-screen overflow-hidden">
       <div className="w-1/2">
         <Sidebar />
       </div>
-      <div className="w-full overflow-y-auto">
+      <div className="w-full overflow-y-auto hide-scrollbar">
         <ThreadDetailCard key={thread.id} thread={thread} onLike={handleLike} />
 
         <div className="flex items-center gap-4 p-4">
@@ -227,9 +251,19 @@ export function ThreadDetail() {
           </form>
         </div>
 
-        {replies.map((reply) => (
-          <ReplyCard key={reply.id} reply={reply} />
-        ))}
+        {replies.map((reply, i) => {
+          const isLast = replies.length === i + 1;
+          return (
+            <div key={reply.id} ref={isLast ? lastReplyRef : null}>
+              <ReplyCard reply={reply} />
+            </div>
+          );
+        })}
+        {loading && (
+          <div className="text-center py-4 text-sm text-gray-500">
+            Loading more...
+          </div>
+        )}
       </div>
       <div className="w-3/4">
         <ProfileCard />
