@@ -6,6 +6,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import PrivateRoute from "./lib/PrivateRoute";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import FollowsPage from "./pages/Follows";
 import { Home } from "./pages/Home";
 import { ThreadDetail } from "./pages/ThreadDetail";
 
@@ -33,6 +34,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <ThreadDetail />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/follows"
+              element={
+                <PrivateRoute>
+                  <FollowsPage />
                 </PrivateRoute>
               }
             />

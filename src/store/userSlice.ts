@@ -23,9 +23,20 @@ const userSlice = createSlice({
         localStorage.setItem("user", JSON.stringify(state));
       }
     },
+    followUser: (
+      state,
+      action: PayloadAction<{
+        following: number;
+      }>
+    ) => {
+      if (state) {
+        state.following = action.payload.following;
+        localStorage.setItem("user", JSON.stringify(state));
+      }
+    },
     clearUser: () => null,
   },
 });
 
-export const { setUser, updateUser, clearUser } = userSlice.actions;
+export const { setUser, updateUser, followUser, clearUser } = userSlice.actions;
 export default userSlice.reducer;
