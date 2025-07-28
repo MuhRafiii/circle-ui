@@ -1,10 +1,64 @@
-import { EditProfile } from "@/pages/EditProfile";
+import { useSocket } from "@/hooks/useSocket";
 import type { RootState } from "@/store";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import { EditProfile } from "./EditProfile";
 import { Card, CardContent } from "./ui/card";
 
 export function ProfileCard() {
   const user = useSelector((state: RootState) => state.user);
+  const socket = useSocket();
+  const [followers, setFollowers] = useState(user?.followers || 0);
+  const [following, setFollowing] = useState(user?.following || 0);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewFollower = ({
+      followerId,
+      followerName,
+      followerUsername,
+    }: {
+      followerId: number;
+      followerName: string;
+      followerUsername: string;
+    }) => {
+      if (followerId !== user?.id) {
+        setFollowers((prev) => prev + 1);
+        toast.info(
+          `${followerName} (@${followerUsername}) started following you.`
+        );
+      } else {
+        setFollowing((prev) => prev + 1);
+      }
+    };
+
+    socket.on("new-follower", handleNewFollower);
+
+    return () => {
+      socket.off("new-follower", handleNewFollower);
+    };
+  }, [socket, user]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleUnfollow = (followerId: number) => {
+      if (followerId !== user?.id) {
+        setFollowers((prev) => prev - 1);
+      } else {
+        setFollowing((prev) => prev - 1);
+      }
+    };
+
+    socket.on("new-unfollower", handleUnfollow);
+
+    return () => {
+      socket.off("new-unfollower", handleUnfollow);
+    };
+  }, [socket, user]);
+
   return (
     <aside className="w-full min-h-screen flex flex-col justify-between p-4 space-y-4 border-l text-start">
       <div className="space-y-6">
@@ -31,15 +85,11 @@ export function ProfileCard() {
             </div>
             <div className="flex gap-2 text-sm">
               <div className="text-gray-400">
-                <span className="text-white">
-                  <strong>0 </strong>
-                </span>
+                <span className="text-white font-bold mr-1">{following}</span>
                 Following
               </div>
               <div className="text-gray-400">
-                <span className="text-white">
-                  <strong>0 </strong>
-                </span>
+                <span className="text-white font-bold mr-1">{followers}</span>
                 Followers
               </div>
             </div>

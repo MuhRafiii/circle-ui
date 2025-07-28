@@ -13,6 +13,17 @@ import { updateUser } from "@/store/userSlice";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "./ui/alert-dialog";
 
 export function EditProfile() {
   const user = useSelector((state: RootState) => state.user);
@@ -32,6 +43,15 @@ export function EditProfile() {
     }
   };
 
+  const handleDeletePhoto = async () => {
+    try {
+      const res = await api.delete("/user/delete-photo");
+      setAvatar(res.data.data.avatar);
+    } catch (error) {
+      console.error("Failed to delete profile photo", error);
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -40,8 +60,12 @@ export function EditProfile() {
       formData.append("username", username);
       formData.append("name", name);
       formData.append("bio", bio);
+
       if (file) {
         formData.append("avatar", file);
+      } else if (avatar === "/default.png") {
+        // Kirim sinyal ke backend untuk reset avatar
+        formData.append("avatar", "");
       }
 
       await api.patch("/user", formData);
@@ -66,21 +90,44 @@ export function EditProfile() {
               <h2 className="text-2xl font-bold">Edit Profile</h2>
             </DialogHeader>
 
-            <div className="w-full max-w-md space-y-2 p-4 rounded-lg shadow-lg">
-              <div className="text-center">
+            <div className="w-full max-w-md space-y-4 p-4 rounded-lg shadow-lg">
+              <div className="text-center space-y-2">
                 <img
                   src={avatar}
                   alt="avatar"
                   className="w-20 h-20 rounded-full mx-auto border"
                 />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-2"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  Change Photo
-                </Button>
+                <div className="flex justify-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    Change Photo
+                  </Button>
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" size="sm">
+                        Delete Photo
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete your profile photo?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeletePhoto}>
+                          Continue
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
                 <input
                   type="file"
                   accept="image/*"
@@ -96,7 +143,7 @@ export function EditProfile() {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter your name"
+                  placeholder="Enter your username"
                 />
               </div>
 
@@ -127,9 +174,7 @@ export function EditProfile() {
                     Cancel
                   </Button>
                 </DialogClose>
-                <Button onClick={handleSave} className="mr-0">
-                  Save
-                </Button>
+                <Button onClick={handleSave}>Save</Button>
               </DialogFooter>
             </div>
           </div>

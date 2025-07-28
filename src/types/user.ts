@@ -1,10 +1,3 @@
-export type User = {
-  id: number;
-  username: string;
-  name: string;
-  profile_picture: string;
-};
-
 export type UserState = {
   id: number;
   username: string;
@@ -12,5 +5,7 @@ export type UserState = {
   email: string;
   avatar: string;
   bio: string;
+  following: number;
+  followers: number;
   token: string;
 } | null;

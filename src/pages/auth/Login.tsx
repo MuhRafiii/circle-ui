@@ -19,8 +19,17 @@ export default function Login() {
     try {
       const res = await api.post("/auth/login", { identifier, password });
 
-      const { token, username, name, email, bio, avatar, user_id } =
-        res.data.data;
+      const {
+        token,
+        username,
+        name,
+        email,
+        bio,
+        avatar,
+        user_id,
+        following,
+        followers,
+      } = res.data.data;
 
       login({
         id: user_id,
@@ -29,6 +38,8 @@ export default function Login() {
         email,
         avatar,
         bio,
+        following,
+        followers,
         token,
       });
 
