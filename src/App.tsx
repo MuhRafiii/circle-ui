@@ -8,6 +8,7 @@ import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import FollowsPage from "./pages/Follows";
 import { Home } from "./pages/Home";
+import Search from "./pages/Search";
 import { ThreadDetail } from "./pages/ThreadDetail";
 
 function App() {
@@ -42,6 +43,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <FollowsPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/search"
+              element={
+                <PrivateRoute>
+                  <Search />
                 </PrivateRoute>
               }
             />

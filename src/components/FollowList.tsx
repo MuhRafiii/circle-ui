@@ -1,15 +1,15 @@
 import { api } from "@/services/api";
 import type { RootState } from "@/store";
 import { followUser } from "@/store/userSlice";
-import type { Follower, Following } from "@/types/following";
+import type { Follows } from "@/types/following";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FollowTabs } from "./FollowTabs";
 
 export function FollowList() {
   const [tab, setTab] = useState<"followers" | "following">("followers");
-  const [followers, setFollowers] = useState<Follower[]>([]);
-  const [following, setFollowing] = useState<Following[]>([]);
+  const [followers, setFollowers] = useState<Follows[]>([]);
+  const [following, setFollowing] = useState<Follows[]>([]);
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user);
 
@@ -36,7 +36,12 @@ export function FollowList() {
       await api.post("/following/follows", {
         followed_user_id: Number(userId),
       });
-      dispatch(followUser({ following: user!.following + 1 }));
+      dispatch(
+        followUser({
+          following: user!.following + 1,
+          followers: user!.followers,
+        })
+      );
       fetchUsers(tab);
     } catch (err) {
       console.error("Failed to follow", err);
@@ -44,14 +49,37 @@ export function FollowList() {
   };
 
   const handleUnfollow = async (userId: string) => {
+    setFollowing((prev) =>
+      prev.map((user) =>
+        user.id === userId ? { ...user, is_following: false } : user
+      )
+    );
+
     try {
       await api.delete("/following/follows", {
         data: { followed_id: Number(userId) },
       });
-      dispatch(followUser({ following: user!.following - 1 }));
-      fetchUsers(tab);
+      dispatch(
+        followUser({
+          following: user!.following - 1,
+          followers: user!.followers,
+        })
+      );
+      // fetchUsers(tab);
     } catch (err) {
       console.error("Failed to unfollow", err);
+
+      setFollowing((prev) =>
+        prev.map((user) =>
+          user.id === userId ? { ...user, is_following: true } : user
+        )
+      );
+      dispatch(
+        followUser({
+          following: user!.following + 1,
+          followers: user!.followers,
+        })
+      );
     }
   };
 
@@ -65,7 +93,7 @@ export function FollowList() {
           ? followers.map((follower) => (
               <div
                 key={follower.id}
-                className="flex justify-between items-center"
+                className="h-10 flex justify-between items-center"
               >
                 <div className="flex items-center gap-3">
                   <img
@@ -97,7 +125,10 @@ export function FollowList() {
               </div>
             ))
           : following.map((f) => (
-              <div key={f.id} className="flex justify-between items-center">
+              <div
+                key={f.id}
+                className="h-10 flex justify-between items-center"
+              >
                 <div className="flex items-center gap-3">
                   <img
                     src={f.avatar}
@@ -110,12 +141,21 @@ export function FollowList() {
                     <p>{f.bio}</p>
                   </div>
                 </div>
-                <button
-                  onClick={() => handleUnfollow(f.id)}
-                  className="text-xs font-semibold border border-zinc-900 dark:border-slate-300 text-slate-300 hover:text-white hover:dark:border-white cursor-pointer rounded-full px-3 py-1"
-                >
-                  Unfollow
-                </button>
+                {f.is_following ? (
+                  <button
+                    onClick={() => handleUnfollow(f.id)}
+                    className="text-xs font-semibold border border-zinc-900 dark:border-slate-200 text-slate-200 hover:text-white hover:dark:border-white opacity-50 cursor-pointer rounded-full px-3 py-1"
+                  >
+                    Unfollow
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleFollow(f.id)}
+                    className="text-xs font-semibold border border-zinc-900 dark:border-slate-300 text-slate-300 hover:text-white hover:dark:border-white cursor-pointer rounded-full px-3 py-1"
+                  >
+                    Follow
+                  </button>
+                )}
               </div>
             ))}
       </div>

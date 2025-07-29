@@ -130,10 +130,10 @@ export function Home() {
     try {
       const res = await api.post(`/thread/${threadId}/like`);
       const liked = res.data.data.isLiked;
-      dispatch(setLike({ thread_id: threadId, liked }));
       if (liked !== !isLiked) {
         dispatch(setLike({ thread_id: threadId, liked }));
       }
+      dispatch(setLike({ thread_id: threadId, liked }));
     } catch (err) {
       console.error("Gagal like thread", err);
       // Rollback Redux
@@ -166,7 +166,7 @@ export function Home() {
       <div className="w-2/9">
         <Sidebar />
       </div>
-      <div className="w-5/12 overflow-y-auto hide-scrollbar">
+      <div className="w-1/2 overflow-y-auto hide-scrollbar">
         <h1 className="text-2xl text-start font-bold p-4 pt-6">Home</h1>
         <div className="flex items-center gap-4 p-4">
           <Avatar>
@@ -283,7 +283,7 @@ export function Home() {
           </div>
         )}
       </div>
-      <div className="w-1/3">
+      <div className="w-1/3 overflow-y-auto hide-scrollbar">
         <ProfileCard />
       </div>
     </div>

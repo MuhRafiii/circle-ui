@@ -147,10 +147,10 @@ export function ThreadDetail() {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <div className="w-1/2">
+      <div className="w-2/9">
         <Sidebar />
       </div>
-      <div className="w-full overflow-y-auto hide-scrollbar">
+      <div className="w-1/2 overflow-y-auto hide-scrollbar">
         <ThreadDetailCard key={thread.id} thread={thread} onLike={handleLike} />
 
         <div className="flex items-center gap-4 p-4">
@@ -265,7 +265,7 @@ export function ThreadDetail() {
           </div>
         )}
       </div>
-      <div className="w-3/4">
+      <div className="w-1/3 overflow-y-auto hide-scrollbar">
         <ProfileCard />
       </div>
     </div>
