@@ -26,9 +26,20 @@ export default function Register() {
         password,
       });
 
-      const token = res.data.data.token;
-      localStorage.setItem("token", token);
-      login(true);
+      const user = res.data.data;
+      localStorage.setItem("token", user.token);
+
+      login({
+        id: user.user_id,
+        username: user.username,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        bio: user.bio,
+        following: user.following,
+        followers: user.followers,
+        token: user.token,
+      });
       navigate("/");
     } catch (err: any) {
       console.error("Register error", err);

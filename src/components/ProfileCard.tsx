@@ -1,13 +1,16 @@
 import { useSocket } from "@/hooks/useSocket";
 import type { RootState } from "@/store";
+import { followUser } from "@/store/userSlice";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { EditProfile } from "./EditProfile";
+import { FollowSuggestion } from "./FollowSuggestion";
 import { Card, CardContent } from "./ui/card";
 
 export function ProfileCard() {
   const user = useSelector((state: RootState) => state.user);
+  const dispatch = useDispatch();
   const socket = useSocket();
   const [followers, setFollowers] = useState(user?.followers || 0);
   const [following, setFollowing] = useState(user?.following || 0);
@@ -19,18 +22,32 @@ export function ProfileCard() {
       followerId,
       followerName,
       followerUsername,
+      followed_user_id,
     }: {
       followerId: number;
       followerName: string;
       followerUsername: string;
+      followed_user_id: number;
     }) => {
-      if (followerId !== user?.id) {
+      if (user?.id === followed_user_id) {
         setFollowers((prev) => prev + 1);
+        dispatch(
+          followUser({
+            following: user!.following,
+            followers: user!.followers + 1,
+          })
+        );
         toast.info(
           `${followerName} (@${followerUsername}) started following you.`
         );
-      } else {
+      } else if (user?.id === followerId) {
         setFollowing((prev) => prev + 1);
+        dispatch(
+          followUser({
+            following: user!.following + 1,
+            followers: user!.followers,
+          })
+        );
       }
     };
 
@@ -44,11 +61,29 @@ export function ProfileCard() {
   useEffect(() => {
     if (!socket) return;
 
-    const handleUnfollow = (followerId: number) => {
-      if (followerId !== user?.id) {
+    const handleUnfollow = ({
+      followerId,
+      followed_id,
+    }: {
+      followerId: number;
+      followed_id: number;
+    }) => {
+      if (user?.id === followed_id) {
         setFollowers((prev) => prev - 1);
-      } else {
+        dispatch(
+          followUser({
+            following: user!.following,
+            followers: user!.followers - 1,
+          })
+        );
+      } else if (user?.id === followerId) {
         setFollowing((prev) => prev - 1);
+        dispatch(
+          followUser({
+            following: user!.following - 1,
+            followers: user!.followers,
+          })
+        );
       }
     };
 
@@ -95,6 +130,7 @@ export function ProfileCard() {
             </div>
           </CardContent>
         </Card>
+        <FollowSuggestion />
       </div>
     </aside>
   );

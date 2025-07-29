@@ -1,18 +1,10 @@
-export type Follower = {
+export type Follows = {
   id: string;
   username: string;
   name: string;
   bio: string;
   avatar: string;
-  is_following?: boolean;
-};
-
-export type Following = {
-  id: string;
-  username: string;
-  name: string;
-  bio: string;
-  avatar: string;
+  is_following: boolean;
 };
 
 export type FollowsProps = {

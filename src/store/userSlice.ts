@@ -27,10 +27,12 @@ const userSlice = createSlice({
       state,
       action: PayloadAction<{
         following: number;
+        followers: number;
       }>
     ) => {
       if (state) {
         state.following = action.payload.following;
+        state.followers = action.payload.followers;
         localStorage.setItem("user", JSON.stringify(state));
       }
     },
