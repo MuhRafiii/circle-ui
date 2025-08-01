@@ -32,6 +32,12 @@ export function FollowList() {
   };
 
   const handleFollow = async (userId: string) => {
+    setFollowing((prev) =>
+      prev.map((user) =>
+        user.id === userId ? { ...user, is_following: true } : user
+      )
+    );
+
     try {
       await api.post("/following/follows", {
         followed_user_id: Number(userId),
@@ -42,9 +48,20 @@ export function FollowList() {
           followers: user!.followers,
         })
       );
-      fetchUsers(tab);
     } catch (err) {
       console.error("Failed to follow", err);
+
+      setFollowing((prev) =>
+        prev.map((user) =>
+          user.id === userId ? { ...user, is_following: false } : user
+        )
+      );
+      dispatch(
+        followUser({
+          following: user!.following - 1,
+          followers: user!.followers,
+        })
+      );
     }
   };
 
@@ -65,7 +82,6 @@ export function FollowList() {
           followers: user!.followers,
         })
       );
-      // fetchUsers(tab);
     } catch (err) {
       console.error("Failed to unfollow", err);
 
