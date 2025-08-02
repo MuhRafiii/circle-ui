@@ -133,12 +133,7 @@ export function ThreadDetail() {
 
       const res = await api.post(
         `/reply/upload?thread_id=${thread_id}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        formData
       );
       setContent("");
       setPreview(null);
