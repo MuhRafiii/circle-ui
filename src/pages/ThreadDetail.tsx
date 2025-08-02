@@ -30,6 +30,7 @@ export function ThreadDetail() {
   const [thread, setThread] = useState<Thread | null>(null);
   const [replies, setReplies] = useState<Reply[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingPage, setLoadingPage] = useState(false);
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [content, setContent] = useState("");
@@ -60,7 +61,7 @@ export function ThreadDetail() {
       if (loadingPages.current.has(page)) return; // ✅ mencegah duplikasi fetch
       loadingPages.current.add(page);
       try {
-        setLoading(true);
+        setLoadingPage(true);
 
         await new Promise((res) => setTimeout(res, 1000));
 
@@ -80,7 +81,7 @@ export function ThreadDetail() {
       } catch (err) {
         console.error("Gagal fetch thread / replies", err);
       } finally {
-        setTimeout(() => setLoading(false), 300);
+        setTimeout(() => setLoadingPage(false), 300);
       }
     };
 
@@ -124,6 +125,7 @@ export function ThreadDetail() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const formData = new FormData();
       formData.append("content", content);
@@ -140,6 +142,8 @@ export function ThreadDetail() {
       console.log(res.data);
     } catch (err) {
       console.error("Gagal mengupload reply", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -267,7 +271,7 @@ export function ThreadDetail() {
                 </div>
               );
             })}
-            {loading && (
+            {loadingPage && (
               <div className="text-center py-4 text-sm text-gray-500">
                 Loading more...
               </div>

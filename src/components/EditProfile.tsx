@@ -32,6 +32,7 @@ export function EditProfile() {
   const [name, setName] = useState(user?.name || "");
   const [bio, setBio] = useState(user?.bio || "");
   const [avatar, setAvatar] = useState(user?.avatar || "");
+  const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const dialogCloseRef = useRef<HTMLButtonElement>(null);
 
@@ -54,6 +55,7 @@ export function EditProfile() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const file = fileInputRef.current?.files?.[0];
       const formData = new FormData();
@@ -73,6 +75,8 @@ export function EditProfile() {
       dialogCloseRef.current?.click();
     } catch (err) {
       console.error("Failed to update profile", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -174,7 +178,9 @@ export function EditProfile() {
                     Cancel
                   </Button>
                 </DialogClose>
-                <Button onClick={handleSave}>Save</Button>
+                <Button onClick={handleSave}>
+                  {loading ? "Saving..." : "Save"}
+                </Button>
               </DialogFooter>
             </div>
           </div>

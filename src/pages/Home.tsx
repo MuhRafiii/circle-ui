@@ -28,6 +28,7 @@ export function Home() {
   const user = useSelector((state: RootState) => state.user);
   const [threads, setThreads] = useState<Thread[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingPage, setLoadingPage] = useState(false);
   const [content, setContent] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -59,7 +60,7 @@ export function Home() {
       loadingPages.current.add(page);
 
       try {
-        setLoading(true);
+        setLoadingPage(true);
 
         await new Promise((res) => setTimeout(res, 1000));
 
@@ -74,7 +75,7 @@ export function Home() {
         console.error("Gagal fetch data", err);
       } finally {
         setTimeout(() => {
-          setLoading(false);
+          setLoadingPage(false);
         }, 200);
       }
     };
@@ -145,6 +146,7 @@ export function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const formData = new FormData();
       formData.append("content", content);
@@ -158,6 +160,8 @@ export function Home() {
       console.log(res.data);
     } catch (err) {
       console.error("Gagal mengupload thread", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -277,7 +281,7 @@ export function Home() {
             </div>
           );
         })}
-        {loading && (
+        {loadingPage && (
           <div className="text-center py-4 text-sm text-gray-500">
             Loading more...
           </div>
