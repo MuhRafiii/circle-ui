@@ -101,7 +101,7 @@ export function ProfileCard() {
           <CardContent className="space-y-4">
             <div className="font-semibold">My Profile</div>
             <img
-              src="../public/background.jpeg"
+              src="/background.jpeg"
               alt="background"
               className="w-full h-20 rounded-lg"
             />

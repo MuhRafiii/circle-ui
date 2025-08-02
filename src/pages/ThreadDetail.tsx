@@ -137,6 +137,10 @@ export function ThreadDetail() {
         `/reply/upload?thread_id=${thread_id}`,
         formData
       );
+
+      setThread((prev) =>
+        prev ? { ...prev, replies: prev.replies + 1 } : prev
+      );
       setContent("");
       setPreview(null);
       console.log(res.data);
