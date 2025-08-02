@@ -68,7 +68,11 @@ export function EditProfile() {
         formData.append("avatar", "");
       }
 
-      await api.patch("/user", formData);
+      await api.patch("/user", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       dispatch(updateUser({ username, name, bio, avatar }));
       dialogCloseRef.current?.click();
     } catch (err) {

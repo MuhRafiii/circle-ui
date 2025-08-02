@@ -152,7 +152,11 @@ export function Home() {
         formData.append("image", image);
       }
 
-      const res = await api.post("/thread/upload", formData);
+      const res = await api.post("/thread/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       setContent("");
       setPreview(null);
       console.log(res.data);
