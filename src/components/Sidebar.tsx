@@ -89,7 +89,7 @@ export function Sidebar() {
           </Link>
         </nav>
         <Button className="w-full dark:text-white hover:bg-green-600 bg-green-500 rounded-full">
-          Create Post
+          <Link to="/">Create Post</Link>
         </Button>
       </div>
       <Link
