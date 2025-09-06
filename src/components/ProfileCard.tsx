@@ -117,7 +117,7 @@ export function ProfileCard() {
               <div className="text-xl font-semibold">{user?.name}</div>
               <div className="text-sm text-gray-400">@{user?.username}</div>
             </div>
-            <p className="text-xs text-justify">{user?.bio}</p>
+            <p className="text-sm text-justify">{user?.bio}</p>
             <div className="flex gap-2 text-sm">
               <div className="text-gray-400">
                 <span className="text-white font-bold mr-1">{following}</span>
