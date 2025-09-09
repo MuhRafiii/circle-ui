@@ -33,6 +33,7 @@ export function EditProfile() {
   const [bio, setBio] = useState(user?.bio || "");
   const [avatar, setAvatar] = useState(user?.avatar || "");
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const dialogCloseRef = useRef<HTMLButtonElement>(null);
 
@@ -73,8 +74,12 @@ export function EditProfile() {
       await api.patch("/user", formData);
       dispatch(updateUser({ username, name, bio, avatar }));
       dialogCloseRef.current?.click();
-    } catch (err) {
+      setErrorMsg("");
+    } catch (err: any) {
       console.error("Failed to update profile", err);
+      if (err.response?.data?.message === "username already exists") {
+        setErrorMsg("Username already exists");
+      }
     } finally {
       setLoading(false);
     }
@@ -146,7 +151,7 @@ export function EditProfile() {
                 <Input
                   type="text"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={(e) => setUsername(e.target.value.toLowerCase())}
                   placeholder="Enter your username"
                 />
               </div>
@@ -171,6 +176,10 @@ export function EditProfile() {
                   rows={4}
                 />
               </div>
+
+              {errorMsg && (
+                <p className="text-red-500 text-center">{errorMsg}</p>
+              )}
 
               <DialogFooter>
                 <DialogClose>

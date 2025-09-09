@@ -43,7 +43,14 @@ export default function Register() {
       navigate("/");
     } catch (err: any) {
       console.error("Register error", err);
-      setErrorMsg(err.response?.data?.message || "Register gagal");
+      if (
+        err.response?.data?.message ===
+          "Invalid register, email already used" ||
+        err.response?.data?.message ===
+          "Invalid register, username already exists"
+      ) {
+        setErrorMsg(err.response.data.message);
+      }
     }
   };
 
@@ -70,7 +77,7 @@ export default function Register() {
             type="text"
             placeholder="Username"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => setUsername(e.target.value.toLowerCase())}
             required
           />
 
