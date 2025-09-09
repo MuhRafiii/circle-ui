@@ -1,14 +1,5 @@
 Circle App - Frontend
 
-Day 9: Search - List User
+Aplikasi media sosial sederhana seperti Threads yang memungkingkan semua user untuk memposting suatu thread atau status yang akan muncul di halaman home dari user lain. Aplikasi ini dilengkapi dengan web socket yang akan menampilkan notifikasi mengenai postingan baru dari user lain dan langsung memperbarui home dengan postingan baru tersebut secara real-time.
 
-- User search by name
-- User search by username
-
-Workflow:
-
-1. Pengguna memasukkan kueri pencarian (search query) ke dalam kotak pencarian.
-2. Ketika pengguna menekan tombol "Cari" atau menekan tombol "Enter", aplikasi akan mengirim permintaan (request) ke server untuk mencari pengguna berdasarkan kueri yang dimasukkan.
-3. Server akan memproses permintaan pencarian dan mengambil data pengguna yang sesuai dengan kueri pencarian.
-4. Jika ada pengguna yang cocok dengan kueri pencarian, server akan mengirimkan respon yang berisi data pengguna yang ditemukan.
-5. Aplikasi klien (frontend) akan menerima respon dari server dan menampilkan daftar pengguna yang sesuai dengan hasil pencarian.
+Backend Repository: https://github.com/MuhRafiii/circle-api
