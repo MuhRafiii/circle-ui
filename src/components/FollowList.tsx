@@ -32,11 +32,21 @@ export function FollowList() {
   };
 
   const handleFollow = async (userId: string) => {
-    setFollowing((prev) =>
-      prev.map((user) =>
-        user.id === userId ? { ...user, is_following: true } : user
-      )
-    );
+    if (tab === "followers") {
+      // update followers state
+      setFollowers((prev) =>
+        prev.map((user) =>
+          user.id === userId ? { ...user, is_following: true } : user
+        )
+      );
+    } else {
+      // update following state
+      setFollowing((prev) =>
+        prev.map((user) =>
+          user.id === userId ? { ...user, is_following: true } : user
+        )
+      );
+    }
 
     try {
       await api.post("/following/follows", {
@@ -66,11 +76,19 @@ export function FollowList() {
   };
 
   const handleUnfollow = async (userId: string) => {
-    setFollowing((prev) =>
-      prev.map((user) =>
-        user.id === userId ? { ...user, is_following: false } : user
-      )
-    );
+    if (tab === "followers") {
+      setFollowers((prev) =>
+        prev.map((user) =>
+          user.id === userId ? { ...user, is_following: false } : user
+        )
+      );
+    } else {
+      setFollowing((prev) =>
+        prev.map((user) =>
+          user.id === userId ? { ...user, is_following: false } : user
+        )
+      );
+    }
 
     try {
       await api.delete("/following/follows", {
