@@ -13,31 +13,48 @@ Aplikasi ini dibangun menggunakan React.js dengan arsitektur modular agar mudah 
 - Vercel — deployment frontend
 
 📁 Struktur Folder
-circle-ui/
-│
-├── src/
-│   ├── components/      # Komponen UI reusable
-│   ├── pages/           # Halaman utama (Home, Thread Detail, Follows, dll)
-│   ├── contexts/        # Global state (AuthContext, ThreadContext)
-│   ├── hooks/           # Custom hooks
-│   ├── services/        # API call (axios)
-│   ├── store/           # Redux slices
-│   ├── types/           # TypeScript definitions (jika digunakan)
-│   └── utils/           # Helper functions
-│
-└── package.json
+<pre>
+  circle-ui/
+  │
+  ├── src/
+  │   ├── components/      # Komponen UI reusable
+  │   ├── pages/           # Halaman utama (Home, Thread Detail, Follows, dll)
+  │   ├── contexts/        # Global state (AuthContext, ThreadContext)
+  │   ├── hooks/           # Custom hooks
+  │   ├── services/        # API call (axios)
+  │   ├── store/           # Redux slices
+  │   ├── types/           # TypeScript definitions (jika digunakan)
+  │   └── utils/           # Helper functions
+  │
+  └── package.json
+</pre>
 
 💻 Fitur Utama
 
 ✅ Login & Register User
+
 ✅ Create & Upload Thread (text + image)
+
 ✅ Like & Reply pada Thread
+
 ✅ Followers & Following List
+
 ✅ Realtime Notification (WebSocket)
+
 ✅ Optimistic Update untuk UX lebih responsif
 
 ⚙️ Cara Menjalankan Project
-<pre> ```bash # Clone repository git clone https://github.com/username/circle-ui.git cd circle-ui # Install dependencies npm install # Jalankan aplikasi npm run dev ``` </pre>
+<pre>
+  # Clone repository
+  git clone https://github.com/username/circle-ui.git
+  cd circle-ui
+  
+  # Install dependencies
+  npm install
+  
+  # Jalankan aplikasi
+  npm run dev
+</pre>
 
 Frontend akan berjalan di:
 👉 http://localhost:5173/
@@ -49,5 +66,7 @@ Aplikasi ini dideploy di Vercel dan terhubung langsung dengan API dari circle-ap
 ✨ Kontributor
 
 👤 Muhammad Rafi
+
 📧 mrafi0603@gmail.com
+
 🚀 Dibuat sebagai bagian dari proyek Dumbways Bootcamp Stage 2
