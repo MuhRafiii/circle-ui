@@ -1,8 +1,11 @@
 🟣 circle-ui (Frontend)
+
+
 📘 Deskripsi
 
 Circle UI adalah bagian frontend dari aplikasi Circle, sebuah platform sosial mini berbasis web yang memungkinkan pengguna untuk membuat thread, membalas, menyukai, serta mengikuti pengguna lain.
 Aplikasi ini dibangun menggunakan React.js dengan arsitektur modular agar mudah dikembangkan dan dikelola.
+
 
 🚀 Tech Stack
 - React.js (Vite) — frontend framework utama
@@ -11,6 +14,7 @@ Aplikasi ini dibangun menggunakan React.js dengan arsitektur modular agar mudah 
 - Context API / Redux Toolkit — manajemen state global
 - Axios — komunikasi dengan backend
 - Vercel — deployment frontend
+
 
 📁 Struktur Folder
 <pre>
@@ -29,6 +33,7 @@ Aplikasi ini dibangun menggunakan React.js dengan arsitektur modular agar mudah 
   └── package.json
 </pre>
 
+
 💻 Fitur Utama
 
 ✅ Login & Register User
@@ -43,6 +48,7 @@ Aplikasi ini dibangun menggunakan React.js dengan arsitektur modular agar mudah 
 
 ✅ Optimistic Update untuk UX lebih responsif
 
+
 ⚙️ Cara Menjalankan Project
 <pre>
   # Clone repository
@@ -56,12 +62,15 @@ Aplikasi ini dibangun menggunakan React.js dengan arsitektur modular agar mudah 
   npm run dev
 </pre>
 
+
 Frontend akan berjalan di:
 👉 http://localhost:5173/
+
 
 🌐 Deployment
 
 Aplikasi ini dideploy di Vercel dan terhubung langsung dengan API dari circle-api.
+
 
 ✨ Kontributor
 
