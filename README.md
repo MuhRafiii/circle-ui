@@ -31,17 +31,12 @@ Circle UI adalah bagian frontend dari aplikasi Circle, sebuah platform sosial mi
 
 💻 Fitur Utama
 
-✅ Login & Register User
-
-✅ Create & Upload Thread (text + image)
-
-✅ Like & Reply pada Thread
-
-✅ Followers & Following List
-
-✅ Realtime Notification (WebSocket)
-
-✅ Optimistic Update untuk UX lebih responsif
+✅ Login & Register User  
+✅ Create & Upload Thread (text + image)  
+✅ Like & Reply pada Thread  
+✅ Followers & Following List  
+✅ Realtime Notification (WebSocket)  
+✅ Optimistic Update untuk UX lebih responsif  
 
 ⚙️ Cara Menjalankan Project
 <pre>
@@ -65,8 +60,7 @@ Frontend akan berjalan di:
 
 ✨ Kontributor
 
-👤 Muhammad Rafi
-
-📧 mrafi0603@gmail.com
+👤 Muhammad Rafi  
+📧 mrafi0603@gmail.com  
 
 🚀 Dibuat sebagai bagian dari proyek Dumbways Bootcamp Stage 2
